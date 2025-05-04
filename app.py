@@ -6,7 +6,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # 👈 This line enables CORS
 
-GOOGLE_API_KEY = "AIzaSyBJb5M4xxjshSpTjM51ZE2Jt6L80MmvCxk"
+MAPBOX_API_KEY = "pk.eyJ1IjoiYXJ1bGVlc3dhcmFuIiwiYSI6ImNtOXBpZWViczEzc3kya3NldHp6Mm14cDEifQ.3Yl29UBAS5KHEC9xWCYO3A"
 WEATHER_API_KEY = "dc6570fdefd02dcceb5465a24a89af9e"
 
 # Intent keyword mapping
@@ -46,16 +46,17 @@ def get_intent(query):
 def get_places(query, lat, lng):
     intent = get_intent(query)
 
-    url = f"https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={lat},{lng}&radius=3000&keyword={intent}&key={GOOGLE_API_KEY}"
+    # Use Mapbox Search API for finding places
+    url = f"https://api.mapbox.com/geocoding/v5/mapbox.places/{intent}.json?proximity={lng},{lat}&access_token={MAPBOX_API_KEY}"
     response = requests.get(url).json()
 
-    if not response["results"]:
+    if not response["features"]:
         return jsonify({"response": f"No nearby {intent}s found."})
 
-    place = response["results"][0]
-    name = place["name"]
-    address = place.get("vicinity", "Address not available")
-    directions_link = f"https://www.google.com/maps/dir/?api=1&destination={place['geometry']['location']['lat']},{place['geometry']['location']['lng']}"
+    place = response["features"][0]
+    name = place["text"]
+    address = place.get("place_name", "Address not available")
+    directions_link = f"https://www.google.com/maps/dir/?api=1&destination={place['geometry']['coordinates'][1]},{place['geometry']['coordinates'][0]}"
 
     reply = f"The nearest {intent} is {name}, located at {address}. Here's the directions link."
 
