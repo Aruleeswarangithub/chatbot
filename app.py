@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify
 import requests
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)  # 👈 This line enables CORS
 
 GOOGLE_API_KEY = "AIzaSyBJb5M4xxjshSpTjM51ZE2Jt6L80MmvCxk"
 WEATHER_API_KEY = "dc6570fdefd02dcceb5465a24a89af9e"
